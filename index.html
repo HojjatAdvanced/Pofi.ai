@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pofy AI | استودیو انیمیشن و هوش مصنوعی</title>
+<meta name="description" content="Pofy AI - استودیوی ساخت انیمیشن سه‌بعدی به سبک دیزنی و پیکسار، ادیت حرفه‌ای عکس و ویدیو با هوش مصنوعی">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --pink:#ff6fb0;
+    --pink-deep:#ff3d94;
+    --gold:#ffd76a;
+    --purple:#7b4dff;
+    --purple-deep:#4b1fb8;
+    --bg-deep:#0d0620;
+    --bg-mid:#180a33;
+    --card:#1c0f3d;
+    --text-soft:#e9ddff;
+    --text-mute:#b7a6e6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Vazirmatn',sans-serif;
+    background:var(--bg-deep);
+    color:var(--text-soft);
+    overflow-x:hidden;
+    position:relative;
+  }
+  ::selection{background:var(--pink-deep);color:#fff;}
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg-deep);}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(var(--pink),var(--purple));border-radius:10px;}
+
+  #stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+  .container{max-width:1180px;margin:0 auto;padding:0 24px;position:relative;z-index:2;}
+
+  /* ---------- Loader ---------- */
+  #loader{
+    position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,#2a1150,#0d0620 70%);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;
+    z-index:9999;transition:opacity .7s ease, visibility .7s ease;
+  }
+  #loader.hidden{opacity:0;visibility:hidden;}
+  .loader-wand{font-size:52px;animation:spin-wand 1.4s ease-in-out infinite;filter:drop-shadow(0 0 18px var(--pink));}
+  @keyframes spin-wand{0%,100%{transform:rotate(-15deg) scale(1);}50%{transform:rotate(15deg) scale(1.15);}}
+  .loader-text{font-weight:700;letter-spacing:2px;color:var(--text-mute);font-size:14px;}
+
+  /* ---------- Nav ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    backdrop-filter:blur(14px);
+    background:rgba(13,6,32,.55);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    transition:padding .3s ease;
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto;}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;color:#fff;}
+  .logo span.emoji{font-size:26px;filter:drop-shadow(0 0 10px var(--pink));}
+  .logo .grad{background:linear-gradient(90deg,var(--pink),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .nav-links{display:flex;gap:30px;list-style:none;}
+  .nav-links a{color:var(--text-soft);text-decoration:none;font-size:15px;font-weight:500;position:relative;transition:color .3s;}
+  .nav-links a:after{content:'';position:absolute;bottom:-6px;right:0;width:0;height:2px;background:linear-gradient(90deg,var(--pink),var(--gold));transition:width .3s;}
+  .nav-links a:hover{color:var(--gold);}
+  .nav-links a:hover:after{width:100%;}
+  .nav-cta{
+    background:linear-gradient(90deg,var(--pink-deep),var(--purple));
+    color:#fff;padding:10px 22px;border-radius:30px;text-decoration:none;font-weight:700;font-size:14px;
+    box-shadow:0 6px 20px rgba(255,61,148,.35);transition:transform .25s, box-shadow .25s;
+  }
+  .nav-cta:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 10px 26px rgba(255,61,148,.5);}
+  .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;}
+  .burger span{width:26px;height:2px;background:#fff;border-radius:2px;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:140px 24px 100px;position:relative;
+  }
+  .hero-glow{
+    position:absolute;top:10%;left:50%;transform:translateX(-50%);
+    width:600px;height:600px;background:radial-gradient(circle,rgba(255,111,176,.35),transparent 70%);
+    filter:blur(40px);z-index:0;pointer-events:none;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.15);padding:8px 18px;border-radius:30px;font-size:13px;
+    color:var(--gold);margin-bottom:26px;animation:float 4s ease-in-out infinite;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem,6vw,4.4rem);font-weight:900;line-height:1.25;margin-bottom:22px;
+  }
+  .hero h1 .grad-text{
+    background:linear-gradient(90deg,var(--pink),var(--gold),var(--purple));
+    background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:shine 5s linear infinite;
+  }
+  @keyframes shine{to{background-position:200% center;}}
+  .hero p.sub{
+    max-width:640px;margin:0 auto 40px;color:var(--text-mute);font-size:clamp(1rem,2vw,1.2rem);line-height:2;
+  }
+  .hero-btns{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-bottom:56px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border-radius:40px;
+    font-weight:700;font-size:15px;text-decoration:none;transition:all .3s ease;cursor:pointer;border:none;
+  }
+  .btn-primary{
+    background:linear-gradient(90deg,var(--pink-deep),var(--purple));color:#fff;
+    box-shadow:0 10px 30px rgba(255,61,148,.4);
+  }
+  .btn-primary:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(255,61,148,.55);}
+  .btn-outline{
+    background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3);
+  }
+  .btn-outline:hover{background:rgba(255,255,255,.08);border-color:var(--gold);}
+  .btn-whatsapp{background:linear-gradient(90deg,#25d366,#128c4a);color:#fff;box-shadow:0 10px 26px rgba(37,211,102,.35);}
+  .btn-whatsapp:hover{transform:translateY(-4px);}
+  .btn-telegram{background:linear-gradient(90deg,#29b6f6,#0d6fb8);color:#fff;box-shadow:0 10px 26px rgba(41,182,246,.35);}
+  .btn-telegram:hover{transform:translateY(-4px);}
+
+  .hero-stats{display:flex;justify-content:center;gap:60px;flex-wrap:wrap;}
+  .stat{text-align:center;}
+  .stat .num{font-size:2.2rem;font-weight:900;background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stat .label{font-size:13px;color:var(--text-mute);margin-top:4px;}
+
+  .float-emoji{position:absolute;font-size:34px;opacity:.85;animation:float 6s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,215,106,.5));z-index:1;}
+  @keyframes float{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-22px) rotate(8deg);}}
+
+  .hero-mascot{
+    position:relative;width:200px;height:200px;margin:0 auto 30px;
+    animation:float 6s ease-in-out infinite;
+  }
+  .hero-mascot .ring{
+    position:absolute;inset:-14px;border-radius:50%;
+    background:conic-gradient(from 0deg,var(--pink),var(--gold),var(--purple),var(--pink));
+    animation:spin-ring 8s linear infinite;filter:blur(1px);
+  }
+  @keyframes spin-ring{to{transform:rotate(360deg);}}
+  .hero-mascot .ring:after{
+    content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg-deep);
+  }
+  .hero-mascot img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;
+    z-index:2;box-shadow:0 20px 50px rgba(255,61,148,.4);border:4px solid rgba(255,255,255,.15);
+  }
+  .hero-mascot .spark{position:absolute;font-size:26px;z-index:3;filter:drop-shadow(0 0 8px var(--gold));}
+  .hero-mascot .spark.s1{top:-10px;right:-14px;animation:float 4s ease-in-out infinite;}
+  .hero-mascot .spark.s2{bottom:-6px;left:-16px;animation:float 5s ease-in-out infinite reverse;}
+
+  /* ---------- Section shared ---------- */
+  section{padding:110px 0;position:relative;}
+  .tag{
+    display:inline-block;color:var(--gold);font-weight:700;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;margin-bottom:14px;
+  }
+  .sec-title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:900;margin-bottom:18px;}
+  .sec-title span{background:linear-gradient(90deg,var(--pink),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sec-sub{color:var(--text-mute);max-width:620px;line-height:2;margin-bottom:20px;}
+  .center{text-align:center;margin-left:auto;margin-right:auto;}
+
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s ease, transform .8s ease;}
+  .reveal.show{opacity:1;transform:translateY(0);}
+
+  /* ---------- About ---------- */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+  .about-visual{position:relative;height:380px;border-radius:28px;overflow:hidden;
+    background:linear-gradient(135deg,var(--purple-deep),var(--pink-deep));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 30px 60px rgba(123,77,255,.3);
+  }
+  .about-visual .orb{position:absolute;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),transparent 70%);animation:pulse 4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.3);opacity:.9;}}
+  .about-visual .icon-big{font-size:110px;filter:drop-shadow(0 0 30px rgba(255,255,255,.5));z-index:2;}
+  .about-list{list-style:none;margin-top:24px;display:flex;flex-direction:column;gap:14px;}
+  .about-list li{display:flex;gap:12px;align-items:flex-start;color:var(--text-soft);}
+  .about-list i{color:var(--gold);margin-top:4px;}
+
+  /* ---------- Services ---------- */
+  .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .service-card{
+    background:linear-gradient(160deg,var(--card),rgba(28,15,61,.4));
+    border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:36px 28px;
+    transition:transform .35s ease, box-shadow .35s ease, border-color .35s;
+    position:relative;overflow:hidden;
+  }
+  .service-card:before{
+    content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,111,176,.12),rgba(123,77,255,.12));
+    opacity:0;transition:opacity .35s;
+  }
+  .service-card:hover{transform:translateY(-10px);border-color:rgba(255,215,106,.4);box-shadow:0 20px 50px rgba(255,111,176,.2);}
+  .service-card:hover:before{opacity:1;}
+  .service-icon{
+    width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--pink-deep),var(--purple));font-size:28px;margin-bottom:22px;color:#fff;
+    box-shadow:0 10px 24px rgba(255,61,148,.35);position:relative;z-index:1;
+  }
+  .service-card h3{font-size:1.2rem;margin-bottom:12px;font-weight:800;position:relative;z-index:1;}
+  .service-card p{color:var(--text-mute);font-size:14px;line-height:1.9;position:relative;z-index:1;}
+
+  /* ---------- Portfolio ---------- */
+  .portfolio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .p-item{
+    aspect-ratio:1/1.1;border-radius:20px;position:relative;overflow:hidden;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:54px;
+    transition:transform .4s ease;
+  }
+  .p-item:hover{transform:scale(1.05) rotate(-1deg);}
+  .p-item .overlay{
+    position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.65),transparent 60%);
+    display:flex;align-items:flex-end;padding:16px;opacity:0;transition:opacity .3s;
+  }
+  .p-item:hover .overlay{opacity:1;}
+  .p-item .overlay span{font-size:13px;font-weight:700;color:#fff;}
+  .p1{background:linear-gradient(135deg,#ff9ac4,#ff3d94);}
+  .p2{background:linear-gradient(135deg,#9b7bff,#4b1fb8);}
+  .p3{background:linear-gradient(135deg,#ffd76a,#ff9843);}
+  .p4{background:linear-gradient(135deg,#6ae4ff,#4d7dff);}
+  .p5{background:linear-gradient(135deg,#ff6fb0,#7b4dff);}
+  .p6{background:linear-gradient(135deg,#ffd76a,#ff6fb0);}
+  .p7{background:linear-gradient(135deg,#7b4dff,#29b6f6);}
+  .p8{background:linear-gradient(135deg,#ff3d94,#ffd76a);}
+
+  /* ---------- Process ---------- */
+  .process{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;counter-reset:step;}
+  .step{position:relative;padding:30px 24px;background:var(--card);border-radius:20px;border:1px solid rgba(255,255,255,.06);}
+  .step .num-badge{
+    width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink-deep),var(--purple));
+    display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:18px;color:#fff;
+  }
+  .step h4{margin-bottom:10px;font-size:1.05rem;font-weight:700;}
+  .step p{color:var(--text-mute);font-size:13.5px;line-height:1.8;}
+
+  /* ---------- Testimonials ---------- */
+  .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+  .testi-card{background:var(--card);border-radius:22px;padding:30px;border:1px solid rgba(255,255,255,.07);}
+  .testi-stars{color:var(--gold);margin-bottom:14px;font-size:14px;}
+  .testi-card p{color:var(--text-soft);line-height:1.9;font-size:14.5px;margin-bottom:20px;}
+  .testi-user{display:flex;align-items:center;gap:12px;}
+  .testi-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,var(--pink),var(--purple));}
+  .testi-name{font-weight:700;font-size:14px;}
+  .testi-role{font-size:12px;color:var(--text-mute);}
+
+  /* ---------- Contact ---------- */
+  .contact-box{
+    background:linear-gradient(135deg,rgba(255,111,176,.12),rgba(123,77,255,.12));
+    border:1px solid rgba(255,255,255,.1);border-radius:32px;padding:70px 40px;text-align:center;
+    position:relative;overflow:hidden;
+  }
+  .contact-box:before{
+    content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(255,215,106,.2),transparent 70%);
+    top:-100px;right:-100px;
+  }
+  .contact-methods{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:40px;}
+  .contact-pill{
+    display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);
+    padding:16px 26px;border-radius:18px;text-decoration:none;color:#fff;transition:all .3s;min-width:220px;
+  }
+  .contact-pill:hover{background:rgba(255,255,255,.14);transform:translateY(-4px);}
+  .contact-pill i{font-size:22px;}
+  .contact-pill .cp-label{font-size:12px;color:var(--text-mute);display:block;}
+  .contact-pill .cp-value{font-weight:700;font-size:14px;}
+  .cp-whatsapp i{color:#25d366;}
+  .cp-telegram i{color:#29b6f6;}
+  .cp-instagram i{color:#ff3d94;}
+  .cp-phone i{color:var(--gold);}
+
+  /* ---------- Footer ---------- */
+  footer{padding:50px 0 30px;border-top:1px solid rgba(255,255,255,.07);text-align:center;color:var(--text-mute);font-size:13.5px;}
+  .footer-socials{display:flex;justify-content:center;gap:16px;margin:20px 0;}
+  .footer-socials a{
+    width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;
+    color:#fff;text-decoration:none;transition:all .3s;border:1px solid rgba(255,255,255,.1);
+  }
+  .footer-socials a:hover{background:linear-gradient(135deg,var(--pink),var(--purple));transform:translateY(-4px);}
+
+  /* ---------- back to top ---------- */
+  #toTop{
+    position:fixed;bottom:26px;left:26px;width:50px;height:50px;border-radius:50%;
+    background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:#fff;border:none;
+    display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:90;
+    box-shadow:0 10px 24px rgba(255,61,148,.4);opacity:0;visibility:hidden;transition:all .3s;
+  }
+  #toTop.show{opacity:1;visibility:visible;}
+
+  #whatsapp-float{
+    position:fixed;bottom:26px;right:26px;width:58px;height:58px;border-radius:50%;
+    background:linear-gradient(135deg,#25d366,#128c4a);display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:26px;text-decoration:none;z-index:90;box-shadow:0 10px 26px rgba(37,211,102,.5);
+    animation:pulse-wa 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse-wa{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.5);}50%{box-shadow:0 0 0 14px rgba(37,211,102,0);}}
+
+  @media(max-width:900px){
+    .nav-links{display:none;}
+    .burger{display:flex;}
+    .about-grid, .services-grid, .portfolio-grid, .process, .testi-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:560px){
+    .services-grid, .portfolio-grid, .process, .testi-grid{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr;}
+    .hero-stats{gap:30px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-wand">✨🪄</div>
+  <div class="loader-text">POFY AI در حال آماده‌سازی جادو...</div>
+</div>
+
+<canvas id="stars-canvas"></canvas>
+
+<header>
+  <nav>
+    <div class="logo"><span class="emoji">🧚‍♀️</span> Pofy <span class="grad">AI</span></div>
+    <ul class="nav-links">
+      <li><a href="#about">درباره ما</a></li>
+      <li><a href="#services">خدمات</a></li>
+      <li><a href="#portfolio">نمونه‌کارها</a></li>
+      <li><a href="#process">مراحل کار</a></li>
+      <li><a href="#testimonials">نظرات</a></li>
+    </ul>
+    <a href="https://wa.me/989933567101" class="nav-cta" target="_blank">شروع سفارش ✨</a>
+    <div class="burger" onclick="document.querySelector('.nav-links').classList.toggle('mobile-show')"><span></span><span></span><span></span></div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <span class="float-emoji" style="top:22%;left:8%;">⭐</span>
+  <span class="float-emoji" style="top:65%;left:12%;animation-delay:1s;">🎬</span>
+  <span class="float-emoji" style="top:30%;right:9%;animation-delay:2s;">🪄</span>
+  <span class="float-emoji" style="top:70%;right:13%;animation-delay:1.5s;">💫</span>
+  <div class="container">
+    <div class="hero-mascot">
+      <div class="ring"></div>
+      <img src="assets/pofy-character.jpg" alt="شخصیت انیمیشنی ساخته‌شده توسط Pofy AI">
+      <span class="spark s1">✨</span>
+      <span class="spark s2">⭐</span>
+    </div>
+    <div class="badge">🏰 استودیو انیمیشن و هوش مصنوعی Pofy AI</div>
+    <h1>دنیای فانتزی خودت رو<br><span class="grad-text">با جادوی هوش مصنوعی</span> بساز</h1>
+    <p class="sub">ساخت انیمیشن‌های سه‌بعدی به سبک دیزنی و پیکسار، تبدیل عکس بچه‌ها و خانواده‌تون به شخصیت‌های انیمیشنی، ادیت حرفه‌ای عکس و ویدیو — همه‌چیز با لمس جادویی Pofy AI ✨</p>
+    <div class="hero-btns">
+      <a href="https://wa.me/989933567101" target="_blank" class="btn btn-whatsapp"><i class="fa-brands fa-whatsapp"></i> سفارش در واتس‌اپ</a>
+      <a href="https://t.me/ai_island_art" target="_blank" class="btn btn-telegram"><i class="fa-brands fa-telegram"></i> کانال تلگرام</a>
+      <a href="https://instagram.com/pofy.ai" target="_blank" class="btn btn-outline"><i class="fa-brands fa-instagram"></i> اینستاگرام</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="num" data-target="24200">0</div><div class="label">دنبال‌کننده</div></div>
+      <div class="stat"><div class="num" data-target="1100000">0</div><div class="label">بازدید ماهانه</div></div>
+      <div class="stat"><div class="num" data-target="59">0</div><div class="label">پست منتشر شده</div></div>
+      <div class="stat"><div class="num" data-target="100">0</div><div class="label">٪ رضایت مشتری</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="container about-grid reveal">
+    <div class="about-visual">
+      <div class="orb" style="top:-30px;right:-30px;"></div>
+      <div class="orb" style="bottom:-50px;left:-20px;animation-delay:2s;"></div>
+      <img src="assets/pofy-character.jpg" alt="نمونه کاراکترسازی Pofy AI" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1;">
+    </div>
+    <div>
+      <span class="tag">درباره Pofy AI</span>
+      <h2 class="sec-title">جایی که <span>تخیل</span> به تصویر تبدیل می‌شود</h2>
+      <p class="sec-sub">Pofy AI یک استودیوی خلاقانه‌ست که با ترکیب هنر و هوش مصنوعی، خاطرات و ایده‌های شما رو به انیمیشن‌ها و تصاویری در سبک استودیوهای بزرگ دیزنی و پیکسار تبدیل می‌کنه. از عکس خانوادگی گرفته تا تبلیغات برند شما، همه با کیفیت سینمایی و حس‌وحال یک قصه‌ی جادویی ساخته می‌شن.</p>
+      <ul class="about-list">
+        <li><i class="fa-solid fa-wand-magic-sparkles"></i> کاراکترسازی اختصاصی از روی عکس واقعی</li>
+        <li><i class="fa-solid fa-wand-magic-sparkles"></i> انیمیشن‌های کوتاه با کیفیت استودیویی</li>
+        <li><i class="fa-solid fa-wand-magic-sparkles"></i> تحویل سریع و پشتیبانی مستقیم در واتس‌اپ و تلگرام</li>
+        <li><i class="fa-solid fa-wand-magic-sparkles"></i> بیش از ۱ میلیون بازدید ماهانه در اینستاگرام</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="container">
+    <div class="center reveal" style="max-width:640px;">
+      <span class="tag">خدمات ما</span>
+      <h2 class="sec-title">هر خدمتی که برای <span>ساختن قصه‌ات</span> لازم داری</h2>
+      <p class="sec-sub" style="margin-left:auto;margin-right:auto;">از ایده تا تصویر نهایی، Pofy AI کنار توئه.</p>
+    </div>
+    <div class="services-grid" style="margin-top:50px;">
+      <div class="service-card reveal"><div class="service-icon">🎞️</div><h3>انیمیشن سه‌بعدی دیزنی/پیکسار</h3><p>تبدیل عکس یا ایده‌ی شما به یک شخصیت و صحنه‌ی انیمیشنی کامل با استاندارد استودیوهای بزرگ هالیوود.</p></div>
+      <div class="service-card reveal"><div class="service-icon">🖼️</div><h3>ادیت حرفه‌ای عکس</h3><p>رتوش، تغییر پس‌زمینه، افکت‌های فانتزی و تبدیل عکس‌های معمولی به آثار هنری خیره‌کننده.</p></div>
+      <div class="service-card reveal"><div class="service-icon">🎥</div><h3>ادیت و موشن ویدیو</h3><p>مونتاژ، رنگ‌بندی سینمایی، افکت بصری و موشن گرافیک برای ریلز، تیزر و تبلیغات.</p></div>
+      <div class="service-card reveal"><div class="service-icon">👶</div><h3>کاراکترسازی خانوادگی</h3><p>ساخت نسخه‌ی انیمیشنی از خودتون و فرزندانتون؛ هدیه‌ای یادگاری و منحصربه‌فرد.</p></div>
+      <div class="service-card reveal"><div class="service-icon">📢</div><h3>محتوای تبلیغاتی برند</h3><p>طراحی پوستر، کاور و کلیپ تبلیغاتی با هویت بصری فانتزی برای کسب‌وکار شما.</p></div>
+      <div class="service-card reveal"><div class="service-icon">💬</div><h3>مشاوره و سفارش سریع</h3><p>ثبت سفارش مستقیم از طریق دایرکت اینستاگرام، واتس‌اپ یا تلگرام با پاسخ‌گویی سریع.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="portfolio">
+  <div class="container">
+    <div class="center reveal" style="max-width:640px;">
+      <span class="tag">نمونه‌کارها</span>
+      <h2 class="sec-title">نگاهی به <span>دنیای جادویی</span> Pofy</h2>
+    </div>
+    <div class="portfolio-grid" style="margin-top:50px;">
+      <div class="p-item p1 reveal" style="background-image:url('assets/pofy-character.jpg');background-size:cover;background-position:center;"><div class="overlay"><span>پرنسس فانتزی</span></div></div>
+      <div class="p-item p2 reveal">🧙‍♂️</div>
+      <div class="p-item p3 reveal">🐉<div class="overlay"><span>موجودات افسانه‌ای</span></div></div>
+      <div class="p-item p4 reveal">🦄</div>
+      <div class="p-item p5 reveal">🏰<div class="overlay"><span>قصر رویایی</span></div></div>
+      <div class="p-item p6 reveal">👼</div>
+      <div class="p-item p7 reveal">🌙<div class="overlay"><span>شب جادویی</span></div></div>
+      <div class="p-item p8 reveal">🎠</div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="container">
+    <div class="center reveal" style="max-width:640px;">
+      <span class="tag">مراحل کار</span>
+      <h2 class="sec-title">از ایده تا <span>تحویل نهایی</span></h2>
+    </div>
+    <div class="process" style="margin-top:50px;">
+      <div class="step reveal"><div class="num-badge">۱</div><h4>ارسال درخواست</h4><p>پیام بده در واتس‌اپ، تلگرام یا دایرکت اینستاگرام و ایده‌ات رو توضیح بده.</p></div>
+      <div class="step reveal"><div class="num-badge">۲</div><h4>طراحی و پیش‌نمایش</h4><p>تیم Pofy یک طرح اولیه و سبک بصری متناسب با ایده‌ی تو آماده می‌کنه.</p></div>
+      <div class="step reveal"><div class="num-badge">۳</div><h4>ساخت با هوش مصنوعی</h4><p>انیمیشن یا ادیت نهایی با دقت و کیفیت سینمایی تولید می‌شه.</p></div>
+      <div class="step reveal"><div class="num-badge">۴</div><h4>تحویل فایل نهایی</h4><p>فایل با کیفیت بالا برای شبکه‌های اجتماعی یا استفاده‌ی شخصی تحویل داده می‌شه.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="testimonials">
+  <div class="container">
+    <div class="center reveal" style="max-width:640px;">
+      <span class="tag">نظر مشتری‌ها</span>
+      <h2 class="sec-title">حرف <span>مشتری‌های خوشحال</span> ما</h2>
+    </div>
+    <div class="testi-grid" style="margin-top:50px;">
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p>«عکس بچه‌مو تبدیل کردن به یه پرنسس دیزنی، از خوشحالی گریه کردم! کیفیت فوق‌العاده بود.»</p>
+        <div class="testi-user"><div class="testi-avatar">👩</div><div><div class="testi-name">مشتری Pofy AI</div><div class="testi-role">سفارش کاراکترسازی</div></div></div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p>«برای تبلیغ برندم یه کلیپ انیمیشنی سفارش دادم، سرعت تحویل و کیفیت کار عالی بود.»</p>
+        <div class="testi-user"><div class="testi-avatar">👨</div><div><div class="testi-name">مشتری Pofy AI</div><div class="testi-role">تبلیغات برند</div></div></div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p>«پاسخ‌گویی سریع در واتس‌اپ و کار حرفه‌ای، حتماً دوباره سفارش می‌دم.»</p>
+        <div class="testi-user"><div class="testi-avatar">👩‍🦰</div><div><div class="testi-name">مشتری Pofy AI</div><div class="testi-role">ادیت ویدیو</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <div class="contact-box reveal">
+      <span class="tag">تماس با ما</span>
+      <h2 class="sec-title">آماده‌ای قصه‌ی جادویی خودت رو بسازیم؟ ✨</h2>
+      <p class="sec-sub center">همین حالا از یکی از راه‌های زیر با ما در ارتباط باش و سفارشت رو ثبت کن.</p>
+      <div class="contact-methods">
+        <a href="https://wa.me/989933567101" target="_blank" class="contact-pill cp-whatsapp"><i class="fa-brands fa-whatsapp"></i><span><span class="cp-label">واتس‌اپ</span><span class="cp-value">0993 356 7101</span></span></a>
+        <a href="https://t.me/ai_island_art" target="_blank" class="contact-pill cp-telegram"><i class="fa-brands fa-telegram"></i><span><span class="cp-label">تلگرام</span><span class="cp-value">ai_island_art@</span></span></a>
+        <a href="https://instagram.com/pofy.ai" target="_blank" class="contact-pill cp-instagram"><i class="fa-brands fa-instagram"></i><span><span class="cp-label">اینستاگرام</span><span class="cp-value">pofy.ai@</span></span></a>
+        <a href="tel:+989933567101" class="contact-pill cp-phone"><i class="fa-solid fa-phone"></i><span><span class="cp-label">تماس مستقیم</span><span class="cp-value">09933567101</span></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="logo center" style="justify-content:center;">🧚‍♀️ Pofy <span class="grad">AI</span></div>
+    <div class="footer-socials">
+      <a href="https://wa.me/989933567101" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+      <a href="https://t.me/ai_island_art" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+      <a href="https://instagram.com/pofy.ai" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+    </div>
+    <p>© 2026 Pofy AI — استودیو انیمیشن و هوش مصنوعی. تمامی حقوق محفوظ است.</p>
+  </div>
+</footer>
+
+<button id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fa-solid fa-arrow-up"></i></button>
+<a id="whatsapp-float" href="https://wa.me/989933567101" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+
+<script>
+  // Loader
+  window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600);
+  });
+
+  // Starfield background
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  function resize(){canvas.width=window.innerWidth;canvas.height=document.body.scrollHeight;}
+  resize();
+  window.addEventListener('resize', resize);
+  const stars = Array.from({length:120}, () => ({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*1.6+0.3,
+    speed: Math.random()*0.3+0.05,
+    alpha: Math.random()
+  }));
+  function drawStars(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s=>{
+      s.alpha += (Math.random()-0.5)*0.05;
+      s.alpha = Math.max(0.1, Math.min(1, s.alpha));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+      ctx.fill();
+      s.y += s.speed;
+      if(s.y > canvas.height) s.y = 0;
+    });
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  // Counters
+  const counters = document.querySelectorAll('.stat .num');
+  const counterIO = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const el = entry.target;
+        const target = +el.dataset.target;
+        let cur = 0;
+        const step = Math.max(1, target/80);
+        const tick = ()=>{
+          cur += step;
+          if(cur >= target){ el.textContent = target.toLocaleString('en-US'); }
+          else { el.textContent = Math.floor(cur).toLocaleString('en-US'); requestAnimationFrame(tick); }
+        };
+        tick();
+        counterIO.unobserve(el);
+      }
+    });
+  }, {threshold:0.5});
+  counters.forEach(c=>counterIO.observe(c));
+
+  // Back to top visibility
+  window.addEventListener('scroll', () => {
+    document.getElementById('toTop').classList.toggle('show', window.scrollY > 500);
+    resize();
+  });
+
+  // Mobile nav
+  const style = document.createElement('style');
+  style.textContent = `.nav-links.mobile-show{display:flex !important;flex-direction:column;position:absolute;top:100%;right:0;left:0;background:#150a2eee;padding:20px;gap:16px;}`;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>
