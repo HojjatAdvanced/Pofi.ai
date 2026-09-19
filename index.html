@@ -80,7 +80,13 @@
   /* ---------- Hero ---------- */
   .hero{
     min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;
-    padding:140px 24px 100px;position:relative;
+    padding:140px 24px 100px;position:relative;overflow:hidden;
+  }
+  .hero-video-bg{position:absolute;inset:0;z-index:-2;overflow:hidden;}
+  .hero-video-bg video{width:100%;height:100%;object-fit:cover;}
+  .hero-video-overlay{
+    position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(180deg,rgba(13,6,32,.55),rgba(13,6,32,.82) 65%,var(--bg-deep) 100%);
   }
   .hero-glow{
     position:absolute;top:10%;left:50%;transform:translateX(-50%);
@@ -332,6 +338,12 @@
 </header>
 
 <section class="hero">
+  <div class="hero-video-bg">
+    <video autoplay muted loop playsinline preload="auto">
+      <source src="assets/pofy-hero.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-video-overlay"></div>
   <div class="hero-glow"></div>
   <span class="float-emoji" style="top:22%;left:8%;">⭐</span>
   <span class="float-emoji" style="top:65%;left:12%;animation-delay:1s;">🎬</span>
